@@ -929,7 +929,7 @@ static void suffixedexp (LexState *ls, expdesc *v) {
         funcargs(ls, v, line);
         break;
       }
-      case '(': case TK_STRING: case '{': {  /* funcargs */
+      case '(': /*case TK_STRING: case '{': */{  /* funcargs */
         luaK_exp2nextreg(fs, v);
         funcargs(ls, v, line);
         break;
@@ -1243,15 +1243,15 @@ static void whilestat (LexState *ls, int line) {
   FuncState *fs = ls->fs;
   int whileinit;
   int condexit;
-  BlockCnt bl;
+  BlockCnt bl;  
   luaX_next(ls);  /* skip WHILE */
+  checknext(ls, '(');
   whileinit = luaK_getlabel(fs);
   condexit = cond(ls);
+  checknext(ls, ')');
   enterblock(fs, &bl, 1);
-  checknext(ls, TK_DO);
-  block(ls);
+  statement(ls);
   luaK_jumpto(fs, whileinit);
-  check_match(ls, TK_BLK_END, TK_WHILE, line);
   leaveblock(fs);
   luaK_patchtohere(fs, condexit);  /* false conditions finish the loop */
 }
@@ -1294,7 +1294,6 @@ static void forbody (LexState *ls, int base, int line, int nvars, int isnum) {
   FuncState *fs = ls->fs;
   int prep, endfor;
   adjustlocalvars(ls, 3);  /* control variables */
-  //checknext(ls, TK_DO);
   prep = isnum ? luaK_codeAsBx(fs, OP_FORPREP, base, NO_JUMP) : luaK_jump(fs);
   enterblock(fs, &bl, 0);  /* scope for declared variables */
   adjustlocalvars(ls, nvars);
@@ -1556,25 +1555,24 @@ static void statement (LexState *ls) {
       whilestat(ls, line);
       break;
     }
-    case TK_DO: {  /* stat -> DO block END */
-      luaX_next(ls);  /* skip DO */
-      block(ls);
-      //check_match(ls, TK_BLK_END, TK_DO, line);
+    /* case TK_DO: { */ /* stat -> DO block END */
+      /*luaX_next(ls);  *//* skip DO */
+      /*block(ls);
       break;
-    }
+    }*/
     case TK_FOR: {  /* stat -> forstat */
       forstat(ls, line);
       break;
     }
-    case TK_REPEAT: {  /* stat -> repeatstat */
-      repeatstat(ls, line);
-      break;
-    }
+    //case TK_REPEAT: {  /* stat -> repeatstat */
+    //  repeatstat(ls, line);
+    //  break;
+    //}
     case TK_FUNCTION: {  /* stat -> funcstat */
       funcstat(ls, line);
       break;
     }
-    case TK_LOCAL: {  /* stat -> localstat */
+    case TK_VAR: {  /* stat -> localstat */
       luaX_next(ls);  /* skip LOCAL */
       if (testnext(ls, TK_FUNCTION))  /* local function? */
         localfunc(ls);

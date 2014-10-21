@@ -137,6 +137,9 @@
     <ClCompile Include="lvm.c" />
     <ClCompile Include="lzio.c" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="testcode.lua" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
